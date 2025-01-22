@@ -6,7 +6,7 @@ const teamNames: string[] = [];
 async function login(driver: WebDriver) {
     try {
         const emailInput = await driver.wait(until.elementLocated(By.id('i0116')), 10000);
-        await emailInput.sendKeys('xx');
+        await emailInput.sendKeys('s99575@pollub.edu.pl');
         const submitButton = await driver.wait(until.elementLocated(By.id('idSIButton9')), 10000);
         await submitButton.click();
         const accTypeQuestion = await isElementPresent(driver, 'aadTile');
@@ -20,7 +20,7 @@ async function login(driver: WebDriver) {
             }
         }
         const passwordInput = await driver.wait(until.elementLocated(By.id('i0118')), 10000);
-        await passwordInput.sendKeys("xx");
+        await passwordInput.sendKeys("Paszabicepsg2a.");
         const submitButton2 = await driver.wait(until.elementLocated(By.id('idSIButton9')), 10000);
         await submitButton2.click();
         const rememberMePopOut = await isElementPresent(driver, 'idSIButton9');
@@ -30,7 +30,6 @@ async function login(driver: WebDriver) {
         }
         await driver.sleep(2000);
     } catch (error) {
-        console.error('Error during login:', error);
         throw error;
     }
 }
@@ -61,7 +60,6 @@ async function runSelenium() {
             try {
                 const name = await teams[i].getText();
                 teamNames[i] = name;
-                console.log(`${name}`);
             } catch (error) {
                 console.log(error)
             }

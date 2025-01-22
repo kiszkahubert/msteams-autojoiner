@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule your task</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Sans+Mono:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: black;
+            color: #04dd04;
+            font-family: 'Ubuntu Sans Mono', monospace;
+            margin: 30px;
+            font-size: 20px;
+        }
+        .header {
+            font-size: 30px;
+        }
+        .row {
+            margin-top: 20px;
+        }
+        .input-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 50%; 
+        }
+        input[type="text"], input[type="password"] {
+            background-color: black;
+            color: #04dd04;
+            border: none;
+            font-family: 'Ubuntu Sans Mono', monospace;
+            font-size: 20px;
+            outline: none;
+            caret-color: transparent;
+            width: 100%;
+            padding: 5px;
+        }
+        .cursor {
+            position: absolute;
+            background-color: #04dd04;
+            height: 2px;
+            width: 8px;
+            pointer-events: none;
+            top: 26px;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="header">Podaj adres email oraz hasło do Teams</h1>
+    <form action="">
+        <div class="row">
+            <label>E-mail:</label>
+            <div class="input-wrapper">
+                <input type="text" id="email-input" name="email">
+                <div class="cursor" id="cursor-email"></div>
+            </div>
+        </div>
+        <div class="row">
+            <label>Hasło:</label>
+            <div class="input-wrapper">
+                <input type="password" id="password-input" name="password">
+                <div class="cursor" id="cursor-password"></div>
+            </div>
+        </div>
+    </form>
+    <script>
+        function setupCursor(inputId, cursorId) {
+            const input = document.getElementById(inputId);
+            const cursor = document.getElementById(cursorId);
+            const measureDiv = document.createElement('div');
+            measureDiv.style.position = 'absolute';
+            measureDiv.style.visibility = 'hidden';
+            measureDiv.style.whiteSpace = 'pre';
+            measureDiv.style.fontFamily = getComputedStyle(input).fontFamily;
+            measureDiv.style.fontSize = getComputedStyle(input).fontSize;
+            document.body.appendChild(measureDiv);
+            input.addEventListener('input', () => {
+                measureDiv.textContent = input.value || ' ';
+                cursor.style.left = `${measureDiv.offsetWidth}px`;
+            });
+            input.addEventListener('focus', () => {
+                cursor.style.display = 'block';
+            });
+            input.addEventListener('blur', () => {
+                cursor.style.display = 'none';
+            });
+        }
+        setupCursor('email-input', 'cursor-email');
+        setupCursor('password-input', 'cursor-password');
+    </script>
+</body>
+</html>
