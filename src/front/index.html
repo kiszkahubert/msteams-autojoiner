@@ -45,25 +45,41 @@
             pointer-events: none;
             top: 26px;
         }
+        .submit-btn {
+            background-color: #04dd04;
+            color: black;
+            border: none;
+            font-family: 'Ubuntu Sans Mono', monospace;
+            font-size: 20px;
+            padding: 10px 20px;
+            margin-top: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .submit-btn:hover {
+            background-color: #02b002;
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
     <h1 class="header">Podaj adres email oraz hasło do Teams</h1>
-    <form action="">
+    <form id="login-form">
         <div class="row">
             <label>E-mail:</label>
             <div class="input-wrapper">
-                <input type="text" id="email-input" name="email">
+                <input type="text" id="email-input" name="email" required>
                 <div class="cursor" id="cursor-email"></div>
             </div>
         </div>
         <div class="row">
             <label>Hasło:</label>
             <div class="input-wrapper">
-                <input type="password" id="password-input" name="password">
+                <input type="password" id="password-input" name="password" required>
                 <div class="cursor" id="cursor-password"></div>
             </div>
         </div>
+        <button type="submit" class="submit-btn" onclick="submitCredentials(event)">Zaloguj się</button>
     </form>
     <script>
         function setupCursor(inputId, cursorId) {
@@ -89,6 +105,28 @@
         }
         setupCursor('email-input', 'cursor-email');
         setupCursor('password-input', 'cursor-password');
+        
+        async function submitCredentials(event) {
+            event.preventDefault();
+            console.log("here");
+            const email = document.getElementById('email-input').value;
+            const password = document.getElementById('password-input').value;
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                console.log("here2");
+                const result = await response.json();
+                alert(result.message);
+            } catch (error) {
+                console.error('Błąd:', error);
+            }
+        }
+        document.getElementById('login-form').addEventListener('submit', submitCredentials);
     </script>
 </body>
 </html>
