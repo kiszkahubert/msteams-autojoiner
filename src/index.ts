@@ -6,7 +6,6 @@ const teamNames: string[] = [];
 
 async function login(driver: WebDriver) {
     try {
-        console.log("login begin");
         const emailInput = await driver.wait(until.elementLocated(By.id('i0116')), 10000);
         await emailInput.sendKeys('s99575@pollub.edu.pl');
         const submitButton = await driver.wait(until.elementLocated(By.id('idSIButton9')), 10000);
@@ -37,7 +36,6 @@ async function login(driver: WebDriver) {
 }
 
 async function isElementPresent(driver: WebDriver, elementId: string): Promise<boolean> {
-    console.log("is present");
     try {
         await driver.sleep(1000);
         await driver.findElement(By.id(elementId));
@@ -72,7 +70,6 @@ async function runSelenium() {
                 console.log(error)
             }
         }
-        console.log("ende");
     } finally {
         await driver.sleep(5000);
         await driver.quit();
