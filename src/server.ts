@@ -1,12 +1,13 @@
 const express = require('express');
 const { spawn } = require('child_process');
 const path = require('path');
-import { error } from 'console';
 import crypto, { Cipher } from 'crypto';
 
 const app = express();
 app.use(express.json());
 require('dotenv').config();
+
+let teamsData: string[] = [];
 
 function encrypt(text: string): string{
     const key = process.env.ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex');
@@ -14,8 +15,19 @@ function encrypt(text: string): string{
     const cipher = crypto.createCipheriv('aes-256-gcm', Buffer.from(key, 'hex'), iv);
     let encrypted = cipher.update(text, 'utf-8','hex');
     encrypted += cipher.final('hex');
-    return `${iv.toString('hex')}:${encrypted}`;
+    const authTag = cipher.getAuthTag();
+    return `${iv.toString('hex')}:${encrypted}:${authTag.toString('hex')}`;
 }
+
+app.post('/update-teams',(req: any, res: any) => {
+    console.log(req.body.teams);
+    teamsData = req.body.teams;
+    res.json({ success: true });
+});
+
+app.get('/get-teams', (req: any, res: any) =>{
+    res.json({ teams: teamsData });
+})
 
 app.post('/login',(req: any,res: any) => {
     const { email, password} = req.body;

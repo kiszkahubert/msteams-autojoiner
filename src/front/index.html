@@ -81,6 +81,7 @@
         </div>
         <button type="submit" class="submit-btn" onclick="submitCredentials(event)">Zaloguj się</button>
     </form>
+    <div id="teams-list" style="margin-top: 30px;"></div>
     <script>
         function setupCursor(inputId, cursorId) {
             const input = document.getElementById(inputId);
@@ -108,7 +109,6 @@
         
         async function submitCredentials(event) {
             event.preventDefault();
-            console.log("here");
             const email = document.getElementById('email-input').value;
             const password = document.getElementById('password-input').value;
             try {
@@ -119,12 +119,36 @@
                     },
                     body: JSON.stringify({ email, password })
                 });
-                console.log("here2");
                 const result = await response.json();
-                alert(result.message);
+                if(result.success){
+                    pollTeamsData();
+                }
             } catch (error) {
                 console.error('Błąd:', error);
             }
+        }
+        async function pollTeamsData() {
+            const pollCheckInterval = setInterval(async() =>{
+                try{
+                    const response = await fetch('get-teams');
+                    const data = await response.json();
+                    if(data.teams && data.teams.lenght > 0){
+                        displayTeams(data.teams);
+                        clearInterval(pollCheckInterval);
+                    }
+                } catch(error){
+                    console.log(error);
+                }
+            }, 2000);
+        }
+        function displayTeams(teams){
+            const teamsListDiv = document.getElementById('teams-list');
+            teamsListDiv.innerHTML = `
+                <h2 style="color: #04dd04; margin-bottom: 15px;">Your Teams:</h2>
+                <ul style="list-style-type: none; padding: 0;">
+                    ${teams.map(team => team ? `<li style="margin: 10px 0;">${team}</li>` : '').join('')}
+                </ul>
+            `;
         }
         document.getElementById('login-form').addEventListener('submit', submitCredentials);
     </script>
