@@ -1,25 +1,10 @@
-import { Builder, By, Key, until, WebDriver } from 'selenium-webdriver'
+import { Builder, By, until, WebDriver } from 'selenium-webdriver'
 import chrome from 'selenium-webdriver/chrome'
-import crypto from 'crypto';
 import axios from 'axios';
+import { decrypt } from './cryptoService';
 
 var personalAccount: boolean = false;
 const teamNames: string[] = [];
-
-function decrypt(encryptedText: string): string{
-    const key = process.env.ENCRYPTION_KEY || '';
-    const [ivHex, encrypted, authTagHex] = encryptedText.split(':');
-    if(!ivHex || !encrypted || !authTagHex){
-        throw new Error('Invalid data');
-    }
-    const iv = Buffer.from(ivHex, 'hex');
-    const authTag = Buffer.from(authTagHex, 'hex');
-    const decipher = crypto.createDecipheriv('aes-256-gcm', Buffer.from(key,'hex'), iv);
-    decipher.setAuthTag(authTag);
-    let decrypted = decipher.update(encrypted, 'hex', 'utf-8');
-    decrypted += decipher.final('utf-8');
-    return decrypted;
-}
 
 async function login(driver: WebDriver, email:string, password: string) {
     try {
@@ -86,7 +71,9 @@ async function runSelenium() {
         for (let i = 3; i < teams.length; i++) {
             try {
                 const name = await teams[i].getText();
-                teamNames[i] = name;
+                if(name){
+                    teamNames.push(name);
+                }
             } catch (error) {
                 console.log(error)
             }

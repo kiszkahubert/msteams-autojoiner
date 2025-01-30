@@ -1,23 +1,15 @@
 const express = require('express');
 const { spawn } = require('child_process');
 const path = require('path');
-import crypto, { Cipher } from 'crypto';
+import { encrypt } from './cryptoService';
 
 const app = express();
 app.use(express.json());
+app.use(express.static(path.join(__dirname, '../src/front')));
 require('dotenv').config();
 
 let teamsData: string[] = [];
-
-function encrypt(text: string): string{
-    const key = process.env.ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex');
-    const iv = crypto.randomBytes(16)
-    const cipher = crypto.createCipheriv('aes-256-gcm', Buffer.from(key, 'hex'), iv);
-    let encrypted = cipher.update(text, 'utf-8','hex');
-    encrypted += cipher.final('hex');
-    const authTag = cipher.getAuthTag();
-    return `${iv.toString('hex')}:${encrypted}:${authTag.toString('hex')}`;
-}
+let scheduledDateTime: {date: any, time: any};
 
 app.post('/update-teams',(req: any, res: any) => {
     console.log(req.body.teams);
@@ -27,6 +19,11 @@ app.post('/update-teams',(req: any, res: any) => {
 
 app.get('/get-teams', (req: any, res: any) =>{
     res.json({ teams: teamsData });
+})
+
+app.post('/get-datetime',(req: any, res: any) => {
+    scheduledDateTime = req.body;
+    res.json({ success: true });
 })
 
 app.post('/login',(req: any,res: any) => {
