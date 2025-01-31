@@ -1,6 +1,7 @@
 import Redis from 'ioredis'
 import { v4 as uuidv4 } from 'uuid'
 import { encrypt } from './cryptoService'
+import { Schedule } from '../models/Schedule';
 
 interface ClientSession {
     teamsData?: string[]
@@ -25,7 +26,6 @@ async function createSession(): Promise<string> {
     await redis.set(`session:${sessionId}`, JSON.stringify({}),'EX', 1800);
     return sessionId;
 }
-
 async function updateLoginData(sessionId: string, email: string, password: string) {
     const encryptedEmail = encrypt(email);
     const encryptedPassword = encrypt(password);
@@ -54,10 +54,31 @@ async function updateSessionData(sessionId: string, data: Partial<ClientSession>
     const updatedSession = { ...existingSession, ...data };
     await redis.set(`session:${sessionId}`, JSON.stringify(updatedSession), 'EX', 3600);
 }
-
 async function getSessionData(sessionId: string): Promise<ClientSession | null>{
     const sessionJson = await redis.get(`session:${sessionId}`);
     return sessionJson ? JSON.parse(sessionJson) : null;
+}
+async function redisToMongo(){
+    const sessionIds = await redis.keys('session:*');
+    let newSchedule = null
+    for(const sessionId of sessionIds){
+        const sessionData = await getSessionData(sessionId.replace('session:',''));
+        if(sessionData && sessionData.scheduleDateTime){
+            newSchedule = new Schedule({
+                login: sessionData.loginData!.email,
+                password: sessionData.loginData!.email,
+                date: sessionData.scheduleDateTime.date,
+                time: sessionData.scheduleDateTime.time,
+                teamName: sessionData.scheduleDateTime.teamName
+            });
+        }
+        try{
+            await newSchedule!.save();
+        } catch(error){
+            console.log(error)
+        }
+        await redis.del(sessionId);
+    }
 }
 
 export { 
@@ -66,5 +87,6 @@ export {
     getSessionData, 
     updateLoginData, 
     updateTeamsData, 
-    updateScheduleDateTime 
+    updateScheduleDateTime,
+    redisToMongo
 }

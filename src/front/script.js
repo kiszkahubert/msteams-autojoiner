@@ -7,7 +7,7 @@ let datePicker;
 function updateDots() {
     const waitingText = document.getElementById('waiting-text');
     currentDots = (currentDots + 1) % 4;
-    waitingText.textContent = 'Zaczekaj ' + '.'.repeat(currentDots);
+    waitingText.textContent = 'Zaczekaj ' + '.'.repeat(currentDots === 0 ? 1 : currentDots);
 }
 function setupCursor(inputId, cursorId) {
     const input = document.getElementById(inputId);
@@ -121,7 +121,6 @@ async function submitCredentials(event) {
         });
 
         const result = await response.json();
-        clearInterval(dotsInterval);
         if (result.success) {
             localStorage.setItem('sessionId', result.sessionId);
             pollTeamsData();

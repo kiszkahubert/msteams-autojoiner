@@ -1,9 +1,10 @@
 const express = require('express');
 const { spawn } = require('child_process');
 const path = require('path');
-import { createSession, updateLoginData, updateTeamsData, updateScheduleDateTime, getSessionData } from './services/sessionService';
+import { createSession, updateLoginData, updateTeamsData, updateScheduleDateTime, getSessionData, redisToMongo } from './services/sessionService';
 import { connectDB } from './database';
 
+const POLL_INTERVAL = 5000;
 const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../src/front')));
@@ -62,4 +63,5 @@ app.post('/login',async (req: any,res: any) => {
 app.get('/',(req: any, res: any) => {
     res.sendFile(path.join(__dirname, '../','src','front','index.html'))
 })
+setInterval(redisToMongo, POLL_INTERVAL);
 app.listen(3000,() => console.log("Working"))
