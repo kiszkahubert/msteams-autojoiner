@@ -20,6 +20,9 @@
     "axios": "^1.7.9",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "selenium-webdriver": "^4.28.1"
+    "ioredis": "^5.4.2",
+    "mongoose": "^8.9.5",
+    "selenium-webdriver": "^4.28.1",
+    "uuid": "^11.0.5"
   }
 }

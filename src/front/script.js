@@ -65,7 +65,7 @@ function handleTimeSelection(event) {
         }
         updateTimeDisplay();
     } else if (event.key === 'Enter') {
-        sendDateTime();
+        sendAllData();
         datetimeElement = document.querySelector('.datetime-stage');
         datetimeElement.style.visibility = 'hidden'
         finalMessage = document.getElementById('last-stage')
@@ -82,7 +82,7 @@ async function sendDateTime(){
             time: formattedTime
         };
         try{
-            const response = await fetch('/get-datetime', {
+            const response = await fetch('/save-schedule', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

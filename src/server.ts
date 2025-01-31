@@ -2,11 +2,13 @@ const express = require('express');
 const { spawn } = require('child_process');
 const path = require('path');
 import { encrypt } from './cryptoService';
+import { connectDB } from './database';
 
 const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../src/front')));
 require('dotenv').config();
+connectDB();
 
 let teamsData: string[] = [];
 let scheduledDateTime: {date: any, time: any};

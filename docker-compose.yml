@@ -19,3 +19,10 @@ services:
       ME_CONFIG_MONGODB_URL: mongodb://admin:admin@mongodb:27017/
     ports:
       - "8081:8081"
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
