@@ -1,7 +1,8 @@
 import { Builder, By, until, WebDriver } from 'selenium-webdriver'
 import chrome from 'selenium-webdriver/chrome'
 import axios from 'axios';
-import { decrypt } from './cryptoService';
+import { decrypt } from './services/cryptoService';
+import { getSessionData } from './services/sessionService';
 
 var personalAccount: boolean = false;
 const teamNames: string[] = [];
@@ -52,15 +53,18 @@ async function isElementPresent(driver: WebDriver, elementId: string): Promise<b
 }
 
 async function runSelenium() {
-    const [,,encryptedEmail, encryptedPassword] = process.argv;
+    const [,,sessionId] = process.argv;
+    const sessionData = await getSessionData(sessionId);
+    const encryptedEmail = sessionData!.loginData!.email;
+    const encryptedPassword = sessionData!.loginData!.password;
     const email = decrypt(encryptedEmail);
     const password = decrypt(encryptedPassword);
     const options = new chrome.Options();
     options.addArguments('--headless');
     const driver = await new Builder()
-    .forBrowser('chrome')
-    .setChromeOptions(options)
-    .build();
+        .forBrowser('chrome')
+        .setChromeOptions(options)
+        .build();
     try {
         await driver.get('https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=5e3ce6c0-2b1f-4285-8d4b-75ee78787346&scope=openId%20profile%20openid%20offline_access&redirect_uri=https%3A%2F%2Fteams.microsoft.com%2Fv2&client-request-id=01948937-8045-74c2-9a59-218750826ddd&response_mode=fragment&response_type=code&x-client-SKU=msal.js.browser&x-client-VER=3.27.0&client_info=1&code_challenge=dNavlv0VmOZCOFtD7iPiWdhxjqICJwavD7h6kpDrl60&code_challenge_method=S256&nonce=01948937-8046-78a9-87af-71201f777aab&state=eyJpZCI6IjAxOTQ4OTM3LTgwNDYtN2U2OS05MzRkLWJjNjZlMTM3ZDBjYyIsIm1ldGEiOnsiaW50ZXJhY3Rpb25UeXBlIjoicmVkaXJlY3QifX0%3D%7Chttps%3A%2F%2Fteams.microsoft.com%2Fv2%2F%3Flm%3Ddeeplink%26lmsrc%3DhomePageWeb%26cmpid%3DWebSignIn%26culture%3Dpl-pl%26country%3Dpl%26enablemcasfort21%3Dtrue');
         await login(driver, email, password);
@@ -78,7 +82,7 @@ async function runSelenium() {
                 console.log(error)
             }
         }
-        await axios.post('http://localhost:3000/update-teams', { teams: teamNames });
+        await axios.post('http://localhost:3000/update-teams', { sessionId,teams: teamNames });
         console.log("done");
     } finally {
         await driver.sleep(5000);

@@ -12,6 +12,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^22.10.7",
+    "@types/redis": "^4.0.10",
     "@types/selenium-webdriver": "^4.1.28",
     "eslint": "^9.18.0",
     "typescript": "^5.7.3"

@@ -65,41 +65,43 @@ function handleTimeSelection(event) {
         }
         updateTimeDisplay();
     } else if (event.key === 'Enter') {
-        sendAllData();
-        datetimeElement = document.querySelector('.datetime-stage');
+        sendDateTime();
+        const datetimeElement = document.querySelector('.datetime-stage');
         datetimeElement.style.visibility = 'hidden'
-        finalMessage = document.getElementById('last-stage')
+        const finalMessage = document.getElementById('last-stage')
         finalMessage.style.visibility = 'visible'
     }
 }
-async function sendDateTime(){
+async function sendDateTime() {
+    const sessionId = localStorage.getItem('sessionId');
+    if (!sessionId) {
+        console.error('Brak sessionId');
+        return;
+    }
     const selectedDate = datePicker.selectedDates[0];
     if (selectedDate) {
         const formattedDate = selectedDate.toLocaleDateString('pl-PL');
         const formattedTime = `${String(selectedHours).padStart(2, '0')}:${String(selectedMinutes).padStart(2, '0')}`;
-        const responseData = {
-            date: formattedDate,
-            time: formattedTime
-        };
-        try{
+        const selectedTeam = document.getElementById('selected-team-text').textContent.replace('Wybrano zespół: ', '');
+        try {
             const response = await fetch('/save-schedule', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(responseData)
+                body: JSON.stringify({ sessionId, date: formattedDate, time: formattedTime, teamName: selectedTeam })
             });
             const result = await response.json();
-            if(!result.success){
-                console.error('Datetime save err');
+            if (result.success) {
+                console.log('Zapisano harmonogram');
+            } else {
+                console.error('Błąd zapisu harmonogramu');
             }
-        } catch(error){
-            console.log(error)
+        } catch (error) {
+            console.error(error);
         }
     }
 }
-setupCursor('email-input', 'cursor-email');
-setupCursor('password-input', 'cursor-password');
 async function submitCredentials(event) {
     event.preventDefault();
     const loginStage = document.querySelector('.login-stage');
@@ -117,9 +119,14 @@ async function submitCredentials(event) {
             },
             body: JSON.stringify({ email, password })
         });
+
         const result = await response.json();
-        if(result.success){
+        clearInterval(dotsInterval);
+        if (result.success) {
+            localStorage.setItem('sessionId', result.sessionId);
             pollTeamsData();
+        } else {
+            console.error('Błąd logowania');
         }
     } catch (error) {
         console.error(error);
@@ -160,17 +167,22 @@ function updateSelection() {
     });
 }
 async function pollTeamsData() {
-    const pollCheckInterval = setInterval(async() => {
+    const sessionId = localStorage.getItem('sessionId');
+    if (!sessionId) {
+        console.error('Brak sessionId');
+        return;
+    }
+    const pollCheckInterval = setInterval(async () => {
         try {
-            const response = await fetch('get-teams');
+            const response = await fetch(`/get-teams?sessionId=${sessionId}`);
             const data = await response.json();
-            if(data.teams && data.teams.length > 0) {
+            if (data.teams && data.teams.length > 0) {
                 displayTeams(data.teams);
                 clearInterval(pollCheckInterval);
                 document.querySelector('.waiting-stage').style.display = 'none';
             }
-        } catch(error) {
-            console.log(error);
+        } catch (error) {
+            console.error(error);
         }
     }, 2000);
 }
@@ -195,6 +207,9 @@ function displayTeams(teams) {
     `;
     document.addEventListener('keydown', handleKeyPress);
 }
+
+setupCursor('email-input', 'cursor-email');
+setupCursor('password-input', 'cursor-password');
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('login-form').addEventListener('submit', submitCredentials);
     setupCursor('email-input', 'cursor-email');

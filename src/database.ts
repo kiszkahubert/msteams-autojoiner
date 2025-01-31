@@ -4,10 +4,7 @@ const MONGO_URI = 'mongodb://admin:admin@localhost:27017/Scheduler?authSource=ad
 
 export const connectDB = async () => {
     try {
-        await mongoose.connect(MONGO_URI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        } as any);
+        await mongoose.connect(MONGO_URI);
         console.log('conn established');
     } catch (error) {
         console.log(error);
